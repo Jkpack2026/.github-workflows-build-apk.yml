@@ -17,7 +17,20 @@ jobs:
         run: |
           mkdir -p app-project
           unzip -o KrishnaMarketing_App_Part7.zip -d app-project
+              - name: Find Android project
+        run: |
+          PROJECT_DIR=$(find app-project -name settings.gradle -o -name settings.gradle.kts | head -1 | xargs -r dirname)
+          if [ -z "$PROJECT_DIR" ]; then
+            echo "Android project not found"
+            find app-project -maxdepth 4 -type f
+            exit 1
+          fi
+          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
 
+      - name: Enable AndroidX
+        run: |
+          echo "android.useAndroidX=true" >> "$PROJECT_DIR/gradle.properties"
+          echo "android.enableJetifier=true" >> "$PROJECT_DIR/gradle.properties"
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
